@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enumerator Dashboard - Daily Reporting System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-user-tie"></i> Enumerator Portal
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="ms-auto d-flex align-items-center flex-wrap">
+          <span class="text-white me-3">
+            <i class="fas fa-map-marker-alt"></i> Area: <strong id="userArea">-</strong>
+          </span>
+          <span class="text-white me-3">
+            <i class="fas fa-user"></i> <span id="userName">User</span>
+          </span>
+          <button class="btn btn-danger btn-sm" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Daily Progress Summary -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-chart-line" style="color: #007bff;"></i></div>
+        <div class="stat-label">Total Establishments</div>
+        <div class="stat-value" id="summaryTotal">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-check-circle" style="color: #28a745;"></i></div>
+        <div class="stat-label">Total Completed</div>
+        <div class="stat-value" id="summaryCompleted">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-hourglass-half" style="color: #ffc107;"></i></div>
+        <div class="stat-label">Total Pending</div>
+        <div class="stat-value" id="summaryPending">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-file-check" style="color: #17a2b8;"></i></div>
+        <div class="stat-label">Reports Submitted</div>
+        <div class="stat-value" id="summaryReports">0</div>
+      </div>
+    </div>
+
+    <!-- Message Area -->
+    <div id="messageArea"></div>
+
+    <!-- Tabs Navigation -->
+    <div class="nav-tabs">
+      <button class="nav-link active" onclick="switchTab('submit')">
+        <i class="fas fa-file-upload"></i> Submit Report
+      </button>
+      <button class="nav-link" onclick="switchTab('progress')">
+        <i class="fas fa-chart-bar"></i> My Progress
+      </button>
+    </div>
+
+    <!-- Tab 1: Submit Daily Report -->
+    <div id="submit-tab" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-pencil-alt"></i> Daily Report Submission
+        </div>
+        <div class="card-body">
+          <form id="reportForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportName" class="form-label">Enumerator Name</label>
+                  <input type="text" class="form-control" id="reportName" disabled>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportArea" class="form-label">Area</label>
+                  <input type="text" class="form-control" id="reportArea" disabled>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportDate" class="form-label">Date</label>
+                  <input type="date" class="form-control" id="reportDate" disabled>
+                </div>
+              </div>
+              <div class="col-md-6"></div>
+            </div>
+
+            <div class="card bg-light mb-20">
+              <div class="card-body">
+                <h6 class="text-primary"><i class="fas fa-info-circle"></i> Data Entry</h6>
+                <p class="text-muted mb-0">Enter the counts for establishments processed today</p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportECensus" class="form-label">
+                    <i class="fas fa-digital-tachograph"></i> E-Census Forms *
+                  </label>
+                  <input type="number" class="form-control" id="reportECensus" min="0" placeholder="0" required>
+                  <small class="text-muted">Count of E-Census forms received</small>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportPhysical" class="form-label">
+                    <i class="fas fa-file"></i> Physical Forms *
+                  </label>
+                  <input type="number" class="form-control" id="reportPhysical" min="0" placeholder="0" required>
+                  <small class="text-muted">Count of printed physical forms</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportTotal" class="form-label">
+                    <i class="fas fa-calculator"></i> Total Establishments *
+                  </label>
+                  <input type="number" class="form-control" id="reportTotal" min="0" placeholder="0" required disabled>
+                  <small class="text-muted">Auto-calculated: E-Census + Physical</small>
+                </div>
+              </div>
+              <div class="col-md-6"></div>
+            </div>
+
+            <div class="card bg-light mb-20">
+              <div class="card-body">
+                <h6 class="text-success"><i class="fas fa-tasks"></i> Completion Status</h6>
+                <p class="text-muted mb-0">How many were completed vs pending?</p>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportCompleted" class="form-label">
+                    <i class="fas fa-check-circle" style="color: #28a745;"></i> Completed *
+                  </label>
+                  <input type="number" class="form-control" id="reportCompleted" min="0" placeholder="0" required>
+                  <small class="text-muted">Forms successfully completed</small>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="reportPending" class="form-label">
+                    <i class="fas fa-hourglass-half" style="color: #ffc107;"></i> Pending *
+                  </label>
+                  <input type="number" class="form-control" id="reportPending" min="0" placeholder="0" required>
+                  <small class="text-muted">Forms still pending completion</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="reportIssues" class="form-label">
+                    <i class="fas fa-exclamation-triangle"></i> Issues / Remarks
+                  </label>
+                  <textarea class="form-control" id="reportIssues" rows="3" placeholder="Any issues or remarks (optional)"></textarea>
+                  <small class="text-muted">e.g., Missed respondents due to absence, difficult access, etc.</small>
+                </div>
+              </div>
+            </div>
+
+            <div class="alert alert-info">
+              <i class="fas fa-lightbulb"></i> <strong>Validation:</strong>
+              Completed + Pending must equal Total Establishments
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg btn-block">
+              <i class="fas fa-paper-plane"></i> Submit Report
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Progress Dashboard -->
+    <div id="progress-tab" class="tab-content">
+      <!-- Progress Statistics -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-chart-bar"></i> Work Progress Statistics
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <h6>Completion Rate</h6>
+              <div class="progress" style="height: 30px;">
+                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%">
+                  0%
+                </div>
+              </div>
+              <small class="text-muted">
+                <span id="progressText">0 of 0 completed</span>
+              </small>
+            </div>
+            <div class="col-md-6">
+              <h6>Report Summary</h6>
+              <ul class="list-unstyled">
+                <li><strong>Total Reports:</strong> <span id="reportCount">0</span></li>
+                <li><strong>Last Submission:</strong> <span id="lastSubmission">Never</span></li>
+                <li><strong>Total Submitted:</strong> <span id="totalSubmitted">0</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Daily Reports Table -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-table"></i> Your Daily Reports
+          <button class="btn btn-sm btn-secondary float-end" onclick="exportMyReports()">
+            <i class="fas fa-download"></i> Export CSV
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="reportsContainer"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebaseapp/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebaseapp/10.7.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebaseapp/10.7.0/firebase-auth.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Shared Scripts -->
+  <script src="script.js"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Enumerator Page Script -->
+  <script>
+    // Check enumerator access
+    checkEnumeratorAccess();
+
+    // Initialize page
+    window.addEventListener('load', () => {
+      initializeForm();
+      loadProgressData();
+    });
+
+    // Initialize form with auto-filled data
+    function initializeForm() {
+      const session = getSession();
+
+      // Fill in enumerator info
+      document.getElementById('reportName').value = session.userName || '';
+      document.getElementById('reportArea').value = session.area || '';
+      document.getElementById('reportDate').value = getTodayDate();
+
+      // Update navbar
+      updateUserInfo();
+      document.getElementById('userArea').textContent = session.area || '-';
+
+      // Add event listeners for auto-calculation
+      document.getElementById('reportECensus').addEventListener('change', calculateTotal);
+      document.getElementById('reportPhysical').addEventListener('change', calculateTotal);
+      document.getElementById('reportCompleted').addEventListener('change', validateCompletion);
+      document.getElementById('reportPending').addEventListener('change', validateCompletion);
+    }
+
+    // Auto-calculate total
+    function calculateTotal() {
+      const eCensus = parseInt(document.getElementById('reportECensus').value) || 0;
+      const physical = parseInt(document.getElementById('reportPhysical').value) || 0;
+      const total = eCensus + physical;
+
+      document.getElementById('reportTotal').value = total;
+    }
+
+    // Validate completion + pending = total
+    function validateCompletion() {
+      const completed = parseInt(document.getElementById('reportCompleted').value) || 0;
+      const pending = parseInt(document.getElementById('reportPending').value) || 0;
+      const total = parseInt(document.getElementById('reportTotal').value) || 0;
+
+      const messageDiv = document.getElementById('messageArea');
+
+      if (total > 0 && (completed + pending) !== total) {
+        messageDiv.innerHTML = `<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i>
+          Completed (${completed}) + Pending (${pending}) = ${completed + pending}, but Total is ${total}</div>`;
+      } else {
+        messageDiv.innerHTML = '';
+      }
+    }
+
+    // Handle report submission
+    document.getElementById('reportForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const session = getSession();
+      const messageDiv = document.getElementById('messageArea');
+
+      // Get form values
+      const reportData = {
+        user_id: session.userId,
+        name: session.userName,
+        area: session.area,
+        date: document.getElementById('reportDate').value,
+        ecensus: parseInt(document.getElementById('reportECensus').value) || 0,
+        physical: parseInt(document.getElementById('reportPhysical').value) || 0,
+        total: parseInt(document.getElementById('reportTotal').value) || 0,
+        completed: parseInt(document.getElementById('reportCompleted').value) || 0,
+        pending: parseInt(document.getElementById('reportPending').value) || 0,
+        issues: document.getElementById('reportIssues').value || ''
+      };
+
+      // Validate
+      if (reportData.ecensus === 0 && reportData.physical === 0) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">Please enter at least some data</div>';
+        return;
+      }
+
+      if ((reportData.completed + reportData.pending) !== reportData.total) {
+        messageDiv.innerHTML = '<div class="alert alert-danger">Completed + Pending must equal Total!</div>';
+        return;
+      }
+
+      // Show loading
+      const btn = e.target.querySelector('button');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+      try {
+        const result = await submitReport(reportData);
+
+        if (result.success) {
+          messageDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> ${result.message}</div>`;
+          e.target.reset();
+          initializeForm();
+          loadProgressData();
+
+          setTimeout(() => {
+            messageDiv.innerHTML = '';
+          }, 4000);
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${result.message}</div>`;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-danger">Error submitting report. Please try again.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    });
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Remove active from all nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+
+      // Add active to clicked link
+      event.target.closest('.nav-link').classList.add('active');
+
+      // Reload progress data if switching to progress tab
+      if (tabName === 'progress') {
+        loadProgressData();
+      }
+    }
+
+    // Load progress data
+    async function loadProgressData() {
+      try {
+        const session = getSession();
+
+        // Get summary
+        const summary = await getEnumeratorSummary(session.userId);
+        document.getElementById('summaryTotal').textContent = summary.totalEstablishments;
+        document.getElementById('summaryCompleted').textContent = summary.totalCompleted;
+        document.getElementById('summaryPending').textContent = summary.totalPending;
+        document.getElementById('summaryReports').textContent = summary.totalReports;
+
+        // Get reports
+        const reports = await getUserReports(session.userId);
+
+        // Update progress bar
+        const total = summary.totalEstablishments;
+        const completed = summary.totalCompleted;
+        const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+        document.getElementById('progressBar').style.width = percent + '%';
+        document.getElementById('progressBar').textContent = percent + '%';
+        document.getElementById('progressText').textContent = `${completed} of ${total} completed`;
+
+        // Update report info
+        document.getElementById('reportCount').textContent = reports.length;
+        document.getElementById('totalSubmitted').textContent = `${summary.totalEstablishments} establishments`;
+
+        if (reports.length > 0) {
+          const lastReport = reports[0];
+          document.getElementById('lastSubmission').textContent = formatTimestamp(lastReport.timestamp);
+        }
+
+        // Build reports table
+        if (reports.length === 0) {
+          document.getElementById('reportsContainer').innerHTML = '<div class="alert alert-info">No reports submitted yet.</div>';
+          return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table"><thead><tr>';
+        html += '<th>Date</th><th>E-Census</th><th>Physical</th><th>Total</th><th>Completed</th><th>Pending</th><th>Remarks</th>';
+        html += '</tr></thead><tbody>';
+
+        reports.forEach(report => {
+          const completionRate = report.total > 0 ? Math.round((report.completed / report.total) * 100) : 0;
+          html += `<tr>
+            <td><strong>${report.date}</strong></td>
+            <td>${report.ecensus}</td>
+            <td>${report.physical}</td>
+            <td><strong>${report.total}</strong></td>
+            <td><span class="badge bg-success">${report.completed}</span></td>
+            <td><span class="badge bg-warning">${report.pending}</span></td>
+            <td>${report.issues || '-'}</td>
+          </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        document.getElementById('reportsContainer').innerHTML = html;
+      } catch (error) {
+        console.error('Error loading progress:', error);
+      }
+    }
+
+    // Export reports
+    function exportMyReports() {
+      const table = document.querySelector('#reportsContainer table');
+      if (table) {
+        exportToCSV(table, 'my-reports.csv');
+      } else {
+        alert('No reports to export');
+      }
+    }
+
+    // Auto-refresh every 60 seconds
+    setInterval(() => {
+      loadProgressData();
+    }, 60000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+# Temporary files
+*.log
+*.DS_Store
+node_modules/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+
+# Cache
+.cache/
+*.tmp
+
+# OS
+Thumbs.db

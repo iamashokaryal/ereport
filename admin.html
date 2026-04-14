@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Enumerator System</title>
+
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <i class="fas fa-chart-bar"></i> Admin Dashboard
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <div class="ms-auto d-flex align-items-center">
+          <span class="text-white me-3">
+            <i class="fas fa-user-shield"></i> <span id="userName">Admin</span>
+          </span>
+          <button class="btn btn-danger btn-sm" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Summary Statistics -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-users" style="color: #007bff;"></i></div>
+        <div class="stat-label">Total Enumerators</div>
+        <div class="stat-value" id="statEnumerators">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-file-alt" style="color: #28a745;"></i></div>
+        <div class="stat-label">Total Reports</div>
+        <div class="stat-value" id="statReports">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-building" style="color: #ffc107;"></i></div>
+        <div class="stat-label">Total Establishments</div>
+        <div class="stat-value" id="statEstablishments">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-check-circle" style="color: #17a2b8;"></i></div>
+        <div class="stat-label">Total Completed</div>
+        <div class="stat-value" id="statCompleted">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-hourglass-half" style="color: #dc3545;"></i></div>
+        <div class="stat-label">Total Pending</div>
+        <div class="stat-value" id="statPending">0</div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-icon"><i class="fas fa-database" style="color: #6c757d;"></i></div>
+        <div class="stat-label">E-Census Entries</div>
+        <div class="stat-value" id="statECensus">0</div>
+      </div>
+    </div>
+
+    <!-- Message Area -->
+    <div id="messageArea"></div>
+
+    <!-- Tabs Navigation -->
+    <div class="nav-tabs">
+      <button class="nav-link active" onclick="switchTab('enumerators')">
+        <i class="fas fa-users"></i> Manage Enumerators
+      </button>
+      <button class="nav-link" onclick="switchTab('status')">
+        <i class="fas fa-list"></i> Submission Status
+      </button>
+      <button class="nav-link" onclick="switchTab('reports')">
+        <i class="fas fa-file-alt"></i> View All Reports
+      </button>
+    </div>
+
+    <!-- Tab 1: Manage Enumerators -->
+    <div id="enumerators-tab" class="tab-content active">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-user-plus"></i> Create New Enumerator
+        </div>
+        <div class="card-body">
+          <form id="createEnumeratorForm">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="enumName" class="form-label">Full Name *</label>
+                  <input type="text" class="form-control" id="enumName" placeholder="Enter full name" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="enumId" class="form-label">User ID *</label>
+                  <input type="text" class="form-control" id="enumId" placeholder="e.g., enum_001" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="enumPassword" class="form-label">Password *</label>
+                  <input type="password" class="form-control" id="enumPassword" placeholder="Enter secure password" required>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <label for="enumArea" class="form-label">Area Number *</label>
+                  <input type="number" class="form-control" id="enumArea" placeholder="e.g., 1, 2, 3..." required>
+                </div>
+              </div>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="fas fa-check"></i> Create Enumerator
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Enumerator List -->
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-list"></i> All Enumerators
+          <button class="btn btn-sm btn-secondary float-end" onclick="exportEnumerators()">
+            <i class="fas fa-download"></i> Export CSV
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="enumeratorList"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 2: Submission Status -->
+    <div id="status-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-tasks"></i> Daily Submission Status
+          <button class="btn btn-sm btn-secondary float-end" onclick="refreshStatus()">
+            <i class="fas fa-sync"></i> Refresh
+          </button>
+        </div>
+        <div class="card-body">
+          <div id="statusTable"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab 3: View All Reports -->
+    <div id="reports-tab" class="tab-content">
+      <div class="card">
+        <div class="card-header">
+          <i class="fas fa-file-alt"></i> All Daily Reports
+          <button class="btn btn-sm btn-secondary float-end" onclick="exportReports()">
+            <i class="fas fa-download"></i> Export CSV
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="mb-20">
+            <label for="reportDate" class="form-label">Filter by Date:</label>
+            <input type="date" class="form-control" id="reportDate" onchange="filterReportsByDate()">
+          </div>
+          <div id="reportsTable"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebaseapp/10.7.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebaseapp/10.7.0/firebase-firestore.js"></script>
+  <script src="https://www.gstatic.com/firebaseapp/10.7.0/firebase-auth.js"></script>
+
+  <!-- Firebase Config -->
+  <script src="firebase-config.js"></script>
+
+  <!-- Shared Scripts -->
+  <script src="script.js"></script>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Admin Page Script -->
+  <script>
+    // Check admin access
+    checkAdminAccess();
+    updateUserInfo();
+
+    // Initialize dashboard
+    window.addEventListener('load', () => {
+      loadDashboardData();
+      loadEnumeratorList();
+      loadSubmissionStatus();
+      loadAllReports();
+    });
+
+    // Tab switching
+    function switchTab(tabName) {
+      // Hide all tabs
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Remove active from all nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+
+      // Show selected tab
+      document.getElementById(tabName + '-tab').classList.add('active');
+
+      // Add active to clicked link
+      event.target.closest('.nav-link').classList.add('active');
+    }
+
+    // Load dashboard statistics
+    async function loadDashboardData() {
+      try {
+        const summary = await getAdminSummary();
+
+        document.getElementById('statEnumerators').textContent = summary.enumeratorCount;
+        document.getElementById('statReports').textContent = summary.totalReports;
+        document.getElementById('statEstablishments').textContent = summary.totalEstablishments;
+        document.getElementById('statCompleted').textContent = summary.totalCompleted;
+        document.getElementById('statPending').textContent = summary.totalPending;
+        document.getElementById('statECensus').textContent = summary.totalECensus;
+      } catch (error) {
+        console.error('Error loading dashboard:', error);
+      }
+    }
+
+    // Create enumerator form handler
+    document.getElementById('createEnumeratorForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const name = document.getElementById('enumName').value.trim();
+      const userId = document.getElementById('enumId').value.trim();
+      const password = document.getElementById('enumPassword').value;
+      const area = document.getElementById('enumArea').value;
+
+      const messageDiv = document.getElementById('messageArea');
+      const btn = e.target.querySelector('button');
+      const originalText = btn.innerHTML;
+
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> Creating...';
+
+      try {
+        const result = await createEnumerator(userId, name, password, area);
+
+        if (result.success) {
+          messageDiv.innerHTML = `<div class="alert alert-success"><i class="fas fa-check-circle"></i> ${result.message}</div>`;
+          e.target.reset();
+          loadEnumeratorList();
+          loadDashboardData();
+
+          setTimeout(() => {
+            messageDiv.innerHTML = '';
+          }, 4000);
+        } else {
+          messageDiv.innerHTML = `<div class="alert alert-danger"><i class="fas fa-exclamation-circle"></i> ${result.message}</div>`;
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        messageDiv.innerHTML = '<div class="alert alert-danger">Error creating enumerator. Please try again.</div>';
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }
+    });
+
+    // Load enumerator list
+    async function loadEnumeratorList() {
+      try {
+        const enumerators = await getAllEnumerators();
+        const container = document.getElementById('enumeratorList');
+
+        if (enumerators.length === 0) {
+          container.innerHTML = '<div class="alert alert-info"><i class="fas fa-info-circle"></i> No enumerators created yet.</div>';
+          return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table"><thead><tr>';
+        html += '<th>#</th><th>Name</th><th>User ID</th><th>Area</th><th>Created</th><th>Actions</th>';
+        html += '</tr></thead><tbody>';
+
+        enumerators.forEach((enum_, index) => {
+          const createdDate = enum_.createdAt ? formatDate(enum_.createdAt) : 'N/A';
+          html += `<tr>
+            <td>${index + 1}</td>
+            <td><strong>${enum_.name}</strong></td>
+            <td><code>${enum_.id}</code></td>
+            <td><span class="badge bg-primary">${enum_.area}</span></td>
+            <td>${createdDate}</td>
+            <td>
+              <button class="btn btn-sm btn-info" onclick="viewEnumeratorReports('${enum_.id}')">
+                <i class="fas fa-file-alt"></i> Reports
+              </button>
+            </td>
+          </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        container.innerHTML = html;
+      } catch (error) {
+        console.error('Error loading enumerators:', error);
+      }
+    }
+
+    // View enumerator reports
+    async function viewEnumeratorReports(userId) {
+      const reports = await getUserReports(userId);
+      const user = await getUserData(userId);
+
+      if (reports.length === 0) {
+        alert(`No reports from ${user.name} yet.`);
+        return;
+      }
+
+      // Switch to reports tab and filter
+      document.getElementById('reports-tab').classList.add('active');
+      document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+      document.querySelectorAll('.nav-link')[2].classList.add('active');
+
+      // Build report table
+      let html = `<h5>${user.name} (Area ${user.area})</h5>`;
+      html += '<div class="table-responsive"><table class="table"><thead><tr>';
+      html += '<th>Date</th><th>E-Census</th><th>Physical</th><th>Total</th><th>Completed</th><th>Pending</th><th>Remarks</th>';
+      html += '</tr></thead><tbody>';
+
+      reports.forEach(report => {
+        html += `<tr>
+          <td>${report.date}</td>
+          <td>${report.ecensus}</td>
+          <td>${report.physical}</td>
+          <td>${report.total}</td>
+          <td><span class="badge bg-success">${report.completed}</span></td>
+          <td><span class="badge bg-warning">${report.pending}</span></td>
+          <td>${report.issues || '-'}</td>
+        </tr>`;
+      });
+
+      html += '</tbody></table></div>';
+      document.getElementById('reportsTable').innerHTML = html;
+    }
+
+    // Load submission status
+    async function loadSubmissionStatus() {
+      try {
+        const enumerators = await getAllEnumerators();
+        const today = getTodayDate();
+
+        if (enumerators.length === 0) {
+          document.getElementById('statusTable').innerHTML = '<div class="alert alert-info">No enumerators yet.</div>';
+          return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table"><thead><tr>';
+        html += '<th>Enumerator</th><th>Area</th><th>Status</th><th>Submission Time</th>';
+        html += '</tr></thead><tbody>';
+
+        for (const enum_ of enumerators) {
+          const hasSubmitted = await hasSubmittedToday(enum_.id);
+          const status = hasSubmitted ? '<span class="status-badge status-submitted"><i class="fas fa-check-circle"></i> Submitted</span>' : '<span class="status-badge status-missing"><i class="fas fa-times-circle"></i> Not Submitted</span>';
+
+          // Get last submission time
+          const reports = await getUserReports(enum_.id);
+          const lastSubmission = reports.length > 0 ? formatTimestamp(reports[0].timestamp) : 'Never';
+
+          html += `<tr>
+            <td><strong>${enum_.name}</strong></td>
+            <td>${enum_.area}</td>
+            <td>${status}</td>
+            <td>${lastSubmission}</td>
+          </tr>`;
+        }
+
+        html += '</tbody></table></div>';
+        document.getElementById('statusTable').innerHTML = html;
+      } catch (error) {
+        console.error('Error loading status:', error);
+      }
+    }
+
+    // Load all reports
+    async function loadAllReports() {
+      try {
+        const reports = await getAllReports();
+
+        if (reports.length === 0) {
+          document.getElementById('reportsTable').innerHTML = '<div class="alert alert-info">No reports submitted yet.</div>';
+          return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table"><thead><tr>';
+        html += '<th>Date</th><th>Enumerator</th><th>Area</th><th>E-Census</th><th>Physical</th><th>Total</th><th>Completed</th><th>Pending</th><th>Remarks</th>';
+        html += '</tr></thead><tbody>';
+
+        reports.forEach(report => {
+          html += `<tr>
+            <td>${report.date}</td>
+            <td>${report.name}</td>
+            <td>${report.area}</td>
+            <td>${report.ecensus}</td>
+            <td>${report.physical}</td>
+            <td><strong>${report.total}</strong></td>
+            <td><span class="badge bg-success">${report.completed}</span></td>
+            <td><span class="badge bg-warning">${report.pending}</span></td>
+            <td>${report.issues || '-'}</td>
+          </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        document.getElementById('reportsTable').innerHTML = html;
+      } catch (error) {
+        console.error('Error loading reports:', error);
+      }
+    }
+
+    // Filter reports by date
+    async function filterReportsByDate() {
+      const date = document.getElementById('reportDate').value;
+
+      if (!date) {
+        loadAllReports();
+        return;
+      }
+
+      try {
+        const reports = await getAllReports(date);
+
+        if (reports.length === 0) {
+          document.getElementById('reportsTable').innerHTML = '<div class="alert alert-info">No reports for this date.</div>';
+          return;
+        }
+
+        let html = '<div class="table-responsive"><table class="table"><thead><tr>';
+        html += '<th>Date</th><th>Enumerator</th><th>Area</th><th>E-Census</th><th>Physical</th><th>Total</th><th>Completed</th><th>Pending</th>';
+        html += '</tr></thead><tbody>';
+
+        reports.forEach(report => {
+          html += `<tr>
+            <td>${report.date}</td>
+            <td>${report.name}</td>
+            <td>${report.area}</td>
+            <td>${report.ecensus}</td>
+            <td>${report.physical}</td>
+            <td>${report.total}</td>
+            <td><span class="badge bg-success">${report.completed}</span></td>
+            <td><span class="badge bg-warning">${report.pending}</span></td>
+          </tr>`;
+        });
+
+        html += '</tbody></table></div>';
+        document.getElementById('reportsTable').innerHTML = html;
+      } catch (error) {
+        console.error('Error filtering reports:', error);
+      }
+    }
+
+    // Refresh status
+    function refreshStatus() {
+      loadSubmissionStatus();
+      loadDashboardData();
+      showNotification('Refreshed successfully!', 'success');
+    }
+
+    // Export functions
+    function exportEnumerators() {
+      exportToCSV(document.querySelector('#enumeratorList table'), 'enumerators.csv');
+    }
+
+    function exportReports() {
+      const table = document.querySelector('#reportsTable table');
+      if (table) {
+        exportToCSV(table, 'reports.csv');
+      } else {
+        alert('No table to export');
+      }
+    }
+
+    // Auto-refresh every 30 seconds
+    setInterval(() => {
+      loadDashboardData();
+      loadSubmissionStatus();
+    }, 30000);
+  </script>
+</body>
+</html>
